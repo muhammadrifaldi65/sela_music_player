@@ -21,6 +21,10 @@ Sela menggabungkan pencarian musik YouTube, discovery dari YouTube Music, playli
 - **Antarmuka responsif** — sidebar ringkas, drawer antrean, dan navigasi untuk lebar layar kecil. `Ctrl+K` membuka pencarian.
 
 Streaming, discovery, artwork, dan lirik memerlukan internet serta ketersediaan layanan sumber. Penyimpanan lokal bukan fitur unduh musik offline.
+<img width="1917" height="1025" alt="Screenshot 2026-10-14 225650" src="https://github.com/user-attachments/assets/285dfcee-e0cc-4ce8-8450-b55912974a86" />
+<img width="1917" height="1028" alt="Screenshot 2026-10-14 225725" src="https://github.com/user-attachments/assets/26eae2a2-b900-40d4-ad25-28624c677837" />
+<img width="1917" height="1020" alt="Screenshot 2026-10-14 225845" src="https://github.com/user-attachments/assets/f89e2cfa-bce8-4464-b26b-104f739325d4" />
+<img width="1917" height="1035" alt="Screenshot 2026-10-14 225909" src="https://github.com/user-attachments/assets/8888cf1e-f6ca-4352-8b27-db6d92310df3" />
 
 ## Teknologi
 
