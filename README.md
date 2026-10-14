@@ -139,13 +139,7 @@ docs/superpowers/       Spesifikasi dan rencana pengembangan
 
 Detail target: [spesifikasi aplikasi](docs/superpowers/specs/2026-10-14-music-desktop-design.md) dan [rencana implementasi](docs/superpowers/plans/2026-10-14-music-desktop.md).
 
-## Berkas yang tidak ikut Git
 
-`.gitignore` mengecualikan dependensi, hasil build, cache Rust/Gradle, runtime unduhan, installer Android, log, database lokal, `.env`, kunci/keystore, konfigurasi editor, dan berkas probe lokal.
-
-Source aplikasi, ikon, dokumentasi, `package-lock.json`, `Cargo.lock`, serta source Android dan Gradle wrapper tetap disertakan agar proyek dapat dibangun ulang. Runtime native perlu diunduh terpisah sesuai petunjuk di atas.
-
-Sebelum commit, periksa `git status` dan `git diff --cached`. `.gitignore` tidak menghapus file yang sudah pernah dilacak dan bukan pemindai rahasia.
 
 ## Lisensi
 
