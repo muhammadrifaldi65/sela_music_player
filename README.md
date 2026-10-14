@@ -147,4 +147,4 @@ Detail target: [spesifikasi aplikasi](docs/superpowers/specs/2026-10-14-music-de
 
 ## Lisensi
 
-Lisensi untuk source aplikasi belum ditetapkan dalam repository ini. Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.
+Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.
