@@ -1,0 +1,3 @@
+-keep class app.sela.playback.SelaPlugin { *; }
+-keep @app.tauri.annotation.InvokeArg class app.sela.playback.** { *; }
+-keep class org.schabi.newpipe.extractor.** { *; }

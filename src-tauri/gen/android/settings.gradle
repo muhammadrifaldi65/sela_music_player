@@ -1,0 +1,5 @@
+include ':app'
+
+apply from: 'tauri.settings.gradle'
+include ':sela-playback'
+project(':sela-playback').projectDir = new File(settingsDir, '../../android')

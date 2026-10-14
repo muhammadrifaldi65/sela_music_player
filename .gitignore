@@ -1,0 +1,67 @@
+# Dependencies and frontend output
+node_modules/
+/dist/
+*.tsbuildinfo
+
+# Rust output and generated Tauri schemas
+/target/
+/src-tauri/target/
+/src-tauri/gen/schemas/
+
+# Android build caches and machine-specific configuration
+.gradle/
+.kotlin/
+/src-tauri/android/build/
+/src-tauri/gen/android/**/build/
+/src-tauri/gen/android/**/.cxx/
+/src-tauri/gen/android/**/.externalNativeBuild/
+local.properties
+key.properties
+keystore.properties
+*.jks
+*.keystore
+*.apk
+*.aab
+
+# Downloaded native runtime; install separately (see README)
+/native-runtime/
+/yt-dlp.exe
+/mpv-runtime.zip
+
+# Local probes and captured responses
+/feed-response.json
+/feed-probe.ps1
+/dialog-smoke.ps1
+/desktop-smoke.ps1
+/local-playback-verification.txt
+/media-check.exe
+/media-check.pdb
+
+# Secrets and local application data
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-shm
+*.db-wal
+
+# Logs, editor state, OS files
+*.log
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Keep package-lock.json, Cargo.lock, Android sources and Gradle wrapper tracked.

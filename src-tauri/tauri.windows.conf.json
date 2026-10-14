@@ -1,0 +1,1 @@
+{"bundle":{"targets":["nsis"],"resources":{"../yt-dlp.exe":"yt-dlp.exe","../native-runtime/libmpv-2.dll":"libmpv-2.dll","../native-runtime/node.exe":"node.exe"}}}

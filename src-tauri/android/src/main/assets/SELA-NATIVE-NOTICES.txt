@@ -1,0 +1,20 @@
+Sela Android playback
+
+NewPipeExtractor v0.26.5
+Copyright NewPipe contributors. GNU General Public License version 3 or later.
+Source: https://github.com/TeamNewPipe/NewPipeExtractor/tree/v0.26.5
+Artifact: com.github.TeamNewPipe:NewPipeExtractor:v0.26.5 (https://jitpack.io)
+License: https://www.gnu.org/licenses/gpl-3.0.txt
+The complete corresponding Sela application source must accompany GPL distributions.
+
+AndroidX Media3 1.5.1: Apache License 2.0
+https://github.com/androidx/media/tree/1.5.1
+OkHttp 4.12.0: Apache License 2.0
+https://github.com/square/okhttp/tree/parent-4.12.0
+
+Integration: local Android library, namespace app.sela.playback, minSdk 31.
+Tauri registers app.sela.playback.SelaPlugin; MediaSessionService owns decoding,
+audio focus, noisy-output pause, notification controls and background queue movement.
+SQLite remains owned by Rust via SelaPlugin.nativeStore; there is no second database.
+SAF ACTION_OPEN_DOCUMENT grants persistable read access to local audio.
+NewPipe resolves source URLs in-process; Media3 decodes HTTPS/content audio directly.
