@@ -1,4 +1,6 @@
-# Sela
+ # Sela 
+<img width="128" height="128" alt="128x128" src="https://github.com/user-attachments/assets/f3b81716-5246-44bc-bde8-eb00ec9ef2bb" />
+
 
 **Pemutar musik desktop oleh PGM Community.**
 
@@ -24,6 +26,10 @@ Sela menggabungkan pencarian musik YouTube, discovery dari YouTube Music, playli
 - **Last.fm** — memerlukan kunci/rahasia aplikasi dan otorisasi akun melalui Settings. Kredensial Windows dilindungi DPAPI; pengiriman scrobble menggunakan waktu dengar aktual dan antrean retry lokal.
 
 Streaming, discovery, artwork, dan lirik memerlukan internet serta ketersediaan layanan sumber. Penyimpanan lokal bukan fitur unduh musik offline.
+<img width="1917" height="1025" alt="Screenshot 2026-10-14 225650" src="https://github.com/user-attachments/assets/285dfcee-e0cc-4ce8-8450-b55912974a86" />
+<img width="1917" height="1028" alt="Screenshot 2026-10-14 225725" src="https://github.com/user-attachments/assets/26eae2a2-b900-40d4-ad25-28624c677837" />
+<img width="1917" height="1020" alt="Screenshot 2026-10-14 225845" src="https://github.com/user-attachments/assets/f89e2cfa-bce8-4464-b26b-104f739325d4" />
+<img width="1917" height="1035" alt="Screenshot 2026-10-14 225909" src="https://github.com/user-attachments/assets/8888cf1e-f6ca-4352-8b27-db6d92310df3" />
 
 Track antrean berikutnya disiapkan lebih awal bila tersedia; klik lagu langsung menampilkan status penyiapan. Lirik mulai disiapkan bersamaan dengan ekstraksi audio/video, tanpa menunggu panel lirik atau durasi media; hasil di-cache dan disesuaikan saat durasi tersedia. Respons penyedia tetap dapat terlambat atau terkena rate-limit. Animasi menghormati pengaturan reduced motion.
 
@@ -144,14 +150,12 @@ docs/superpowers/       Spesifikasi dan rencana pengembangan
 
 Detail target: [spesifikasi aplikasi](docs/superpowers/specs/2026-10-14-music-desktop-design.md) dan [rencana implementasi](docs/superpowers/plans/2026-10-14-music-desktop.md).
 
-## Berkas yang tidak ikut Git
 
-`.gitignore` mengecualikan dependensi, hasil build, cache Rust/Gradle, runtime unduhan, installer Android, log, database lokal, `.env`, kunci/keystore, konfigurasi editor, dan berkas probe lokal.
-
-Source aplikasi, ikon, dokumentasi, `package-lock.json`, `Cargo.lock`, serta source Android dan Gradle wrapper tetap disertakan agar proyek dapat dibangun ulang. Runtime native perlu diunduh terpisah sesuai petunjuk di atas.
-
-Sebelum commit, periksa `git status` dan `git diff --cached`. `.gitignore` tidak menghapus file yang sudah pernah dilacak dan bukan pemindai rahasia.
 
 ## Lisensi
 
+<<<<<<< HEAD
 Repository menyertakan GNU General Public License v3 pada `LICENSE`. Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.
+=======
+Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.
+>>>>>>> f6bf7343fc3b0539619337f9a82238d16aae6d99
