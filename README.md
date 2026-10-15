@@ -26,9 +26,9 @@ Sela menggabungkan pencarian musik YouTube, discovery dari YouTube Music, playli
 - **Last.fm** — memerlukan kunci/rahasia aplikasi dan otorisasi akun melalui Settings. Kredensial Windows dilindungi DPAPI; pengiriman scrobble menggunakan waktu dengar aktual dan antrean retry lokal.
 
 Streaming, discovery, artwork, dan lirik memerlukan internet serta ketersediaan layanan sumber. Penyimpanan lokal bukan fitur unduh musik offline.
-<img width="1917" height="1025" alt="Screenshot 2026-10-14 225650" src="https://github.com/user-attachments/assets/285dfcee-e0cc-4ce8-8450-b55912974a86" />
-<img width="1917" height="1028" alt="Screenshot 2026-10-14 225725" src="https://github.com/user-attachments/assets/26eae2a2-b900-40d4-ad25-28624c677837" />
-<img width="1917" height="1020" alt="Screenshot 2026-10-14 225845" src="https://github.com/user-attachments/assets/f89e2cfa-bce8-4464-b26b-104f739325d4" />
+<img width="1917" height="1025" alt="Screenshot 2026-10-14 225650" src="https://github.com/user-attachments/assets/933d5e1b-f128-481b-8067-471e305aeac0" />
+<img width="1917" height="1028" alt="Screenshot 2026-10-14 225725" src="https://github.com/user-attachments/assets/ab86698c-5435-4ac5-9b9f-8d396fcf1c83" />
+<img width="1917" height="1020" alt="Screenshot 2026-10-14 225845" src="https://github.com/user-attachments/assets/b0eeda18-5ac1-4b17-88f7-cef459ca9d02" />
 <img width="1917" height="1035" alt="Screenshot 2026-10-14 225909" src="https://github.com/user-attachments/assets/8888cf1e-f6ca-4352-8b27-db6d92310df3" />
 
 Track antrean berikutnya disiapkan lebih awal bila tersedia; klik lagu langsung menampilkan status penyiapan. Lirik mulai disiapkan bersamaan dengan ekstraksi audio/video, tanpa menunggu panel lirik atau durasi media; hasil di-cache dan disesuaikan saat durasi tersedia. Respons penyedia tetap dapat terlambat atau terkena rate-limit. Animasi menghormati pengaturan reduced motion.
