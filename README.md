@@ -29,7 +29,7 @@ Streaming, discovery, artwork, dan lirik memerlukan internet serta ketersediaan 
 <img width="1917" height="1025" alt="Screenshot 2026-10-14 225650" src="https://github.com/user-attachments/assets/933d5e1b-f128-481b-8067-471e305aeac0" />
 <img width="1917" height="1028" alt="Screenshot 2026-10-14 225725" src="https://github.com/user-attachments/assets/ab86698c-5435-4ac5-9b9f-8d396fcf1c83" />
 <img width="1917" height="1020" alt="Screenshot 2026-10-14 225845" src="https://github.com/user-attachments/assets/b0eeda18-5ac1-4b17-88f7-cef459ca9d02" />
-<img width="1917" height="1035" alt="Screenshot 2026-10-14 225909" src="https://github.com/user-attachments/assets/8888cf1e-f6ca-4352-8b27-db6d92310df3" />
+<img width="1917" height="1035" alt="Screenshot 2026-10-14 225909" src="https://github.com/user-attachments/assets/f4117f37-a8b6-4a4b-9c8c-dcea9c2fb4d5" />
 
 Track antrean berikutnya disiapkan lebih awal bila tersedia; klik lagu langsung menampilkan status penyiapan. Lirik mulai disiapkan bersamaan dengan ekstraksi audio/video, tanpa menunggu panel lirik atau durasi media; hasil di-cache dan disesuaikan saat durasi tersedia. Respons penyedia tetap dapat terlambat atau terkena rate-limit. Animasi menghormati pengaturan reduced motion.
 
