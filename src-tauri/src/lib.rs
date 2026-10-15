@@ -5,9 +5,16 @@ mod queue;
 mod history;
 mod home;
 mod preferences;
+mod settings;
+#[cfg(not(target_os = "android"))]
+mod scrobbling;
+#[cfg(not(target_os = "android"))]
+mod data_management;
 mod lyrics;
 #[cfg(not(target_os = "android"))]
 mod youtube;
+#[cfg(not(target_os = "android"))]
+mod recommendations;
 #[cfg(not(target_os = "android"))]
 mod extractor;
 #[cfg(not(target_os = "android"))]
@@ -16,6 +23,8 @@ mod player;
 mod discord;
 #[cfg(not(target_os = "android"))]
 mod desktop;
+#[cfg(not(target_os = "android"))]
+mod video_surface;
 #[cfg(target_os = "android")]
 mod mobile;
 #[cfg(not(target_os = "android"))]
@@ -126,10 +135,17 @@ async fn sync_queue(_app:&tauri::AppHandle,_store:&Store)->Result<(),String>{
 fn platform() -> &'static str {
     if cfg!(target_os = "android") { "android" } else { "windows" }
 }
+#[tauri::command]
+fn quit_app(app: tauri::AppHandle) { app.exit(0); }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
+    #[cfg(not(target_os = "android"))]
+    let builder = builder
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_autostart::Builder::new().build())
+        .plugin(tauri_plugin_notification::init());
     #[cfg(target_os = "android")]
     let builder = builder.plugin(mobile::init());
     let builder = builder.setup(|app| {
@@ -141,17 +157,21 @@ pub fn run() {
         queue::initialize(&db)?;
         history::initialize(&db)?;
         preferences::initialize(&db)?;
+        settings::initialize(&db)?;
+        app.manage(settings::SettingsState(Mutex::new(settings::read_settings(&db)?)));
+        #[cfg(not(target_os = "android"))]
+        scrobbling::initialize(&db)?;
         let db = Arc::new(Mutex::new(db));
         #[cfg(target_os = "android")]
         mobile::initialize(db.clone())?;
         app.manage(Store(db));
         #[cfg(not(target_os = "android"))]
-        desktop::setup(app)?;
+        { scrobbling::setup(app.handle())?; desktop::setup(app)?; settings::setup(app.handle())?; }
         Ok(())
     });
     #[cfg(not(target_os = "android"))]
-    let builder = builder.invoke_handler(tauri::generate_handler![platform, playlists, create_playlist, delete_playlist, rename_playlist, search, play, set_paused, playback_state, seek, set_volume, add_track, playlist_tracks, reorder_tracks, remove_track, open_local, queue_entries, enqueue, replace_queue_from_playlist, reorder_queue, remove_queue_entry, select_queue_entry, current_queue_entry, history::record_listen, history::listening_history, home::music_home, lyrics::lyrics, discord::discord_connect, discord::discord_clear, discord::discord_update, preferences::music_genres, preferences::music_preferences, preferences::save_music_preferences]);
+    let builder = builder.invoke_handler(tauri::generate_handler![platform, quit_app, playlists, create_playlist, delete_playlist, rename_playlist, search, play, set_paused, playback_state, seek, set_volume, add_track, playlist_tracks, reorder_tracks, remove_track, open_local, queue_entries, enqueue, replace_queue_from_playlist, reorder_queue, remove_queue_entry, select_queue_entry, current_queue_entry, history::listening_history, home::music_home, lyrics::prepare_lyrics, lyrics::lyric_state, discord::discord_connect, discord::discord_clear, discord::discord_update, preferences::music_genres, preferences::music_preferences, preferences::save_music_preferences, playback_next, playback_previous, set_playback_options, set_video_mode, set_video_bounds, settings::get_app_settings, settings::get_settings_status, settings::save_app_settings, scrobbling::lastfm_state, scrobbling::lastfm_configure, scrobbling::lastfm_begin_auth, scrobbling::lastfm_complete_auth, scrobbling::lastfm_disconnect, data_management::cache_metrics, data_management::clear_cache, data_management::export_playlists, data_management::import_playlists, data_management::delete_listening_history]);
     #[cfg(target_os = "android")]
-    let builder = builder.invoke_handler(tauri::generate_handler![platform, playlists, create_playlist, delete_playlist, rename_playlist, search, play, set_paused, playback_state, seek, set_volume, add_track, playlist_tracks, reorder_tracks, remove_track, open_local, queue_entries, enqueue, replace_queue_from_playlist, reorder_queue, remove_queue_entry, select_queue_entry, current_queue_entry, history::listening_history, home::music_home, lyrics::lyrics, playback_next, playback_previous, set_playback_options, preferences::music_genres, preferences::music_preferences, preferences::save_music_preferences]);
+    let builder = builder.invoke_handler(tauri::generate_handler![platform, quit_app, playlists, create_playlist, delete_playlist, rename_playlist, search, play, set_paused, playback_state, seek, set_volume, add_track, playlist_tracks, reorder_tracks, remove_track, open_local, queue_entries, enqueue, replace_queue_from_playlist, reorder_queue, remove_queue_entry, select_queue_entry, current_queue_entry, history::listening_history, home::music_home, lyrics::prepare_lyrics, lyrics::lyric_state, playback_next, playback_previous, set_playback_options, preferences::music_genres, preferences::music_preferences, preferences::save_music_preferences, settings::get_app_settings, settings::save_app_settings]);
     builder.run(tauri::generate_context!()).expect("Sela gagal dijalankan");
 }

@@ -1,8 +1,8 @@
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Track { pub id: String, pub title: String, pub channel: Option<String> }
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub struct Entry { pub entry_id: i64, pub track: Track }
 pub fn initialize(db: &Connection) -> rusqlite::Result<()> {
  db.execute_batch("CREATE TABLE IF NOT EXISTS playlist_entries(id INTEGER PRIMARY KEY, playlist_id INTEGER NOT NULL REFERENCES playlists(id) ON DELETE CASCADE, video_id TEXT NOT NULL, title TEXT NOT NULL, channel TEXT, position INTEGER NOT NULL);")

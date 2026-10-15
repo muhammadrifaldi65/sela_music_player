@@ -32,8 +32,23 @@ pub fn replace_from_playlist(db:&mut Connection,playlist:i64)->Result<Vec<Entry>
  tx.commit().map_err(|e|e.to_string())?;
  Ok(rows)
 }
+
+pub fn next_index(index:Option<usize>,count:usize,repeat:&str,autoplay:bool,automatic:bool)->Option<usize>{
+ let index=index?;
+ if automatic && matches!(repeat,"once"|"song"){return Some(index)}
+ if automatic && !autoplay && repeat!="queue"{return None}
+ if index+1<count{Some(index+1)}else if repeat=="queue" && count>0{Some(0)}else{None}
+}
 #[cfg(test)] mod tests{
  use super::*;
+ #[test]fn progression_preserves_repeat_and_manual_skip_semantics(){
+  assert_eq!(next_index(Some(0),2,"off",false,true),None);
+  assert_eq!(next_index(Some(0),2,"off",false,false),Some(1));
+  for repeat in ["once","song"]{assert_eq!(next_index(Some(1),2,repeat,true,true),Some(1));assert_eq!(next_index(Some(1),2,repeat,true,false),None);}
+  assert_eq!(next_index(Some(1),2,"queue",false,true),Some(0));
+  assert_eq!(next_index(Some(1),2,"off",true,true),None);
+  assert_eq!(next_index(None,0,"queue",true,true),None);
+ }
  #[test]
  fn playlist_replacement_preserves_duplicates_and_rolls_back_invalid_sources(){
   let mut db=Connection::open_in_memory().unwrap();

@@ -1,3 +1,4 @@
+import {t,errorText} from './i18n';
 import {useEffect,useState} from 'react';
 import {invoke} from '@tauri-apps/api/core';
 import {usePreferences} from './Genres';
@@ -18,15 +19,15 @@ export function useGenreDiscovery(){
     const index=next++,genre=chosen[index];
     try{
      const result=await invoke<{entries?:unknown[]}>('search',{query:genre.query});
-     if(!Array.isArray(result.entries))throw new Error('Respons pencarian tidak valid.');
+     if(!Array.isArray(result.entries))throw new Error(t('Respons pencarian tidak valid.'));
      groups[index]=result.entries.flatMap(entry=>{
       if(!entry||typeof entry!=='object')return [];
       const row=entry as Record<string,unknown>;
       if(typeof row.id!=='string'||!/^[\w-]{11}$/.test(row.id)||typeof row.title!=='string'||!row.title.trim())return [];
       return [{id:row.id,title:row.title,channel:typeof row.channel==='string'?row.channel:typeof row.uploader==='string'?row.uploader:null}];
      });
-     if(!groups[index].length)failures[index]=`${genre.label}: tidak ada hasil pencarian yang dapat diputar.`;
-    }catch(error){failures[index]=`${genre.label}: ${String(error)}`}
+     if(!groups[index].length)failures[index]=`${genre.label}: ${t('Tidak ada hasil pencarian yang dapat diputar.')}`;
+    }catch(error){failures[index]=`${genre.label}: ${errorText(error)}`}
     if(active){setItems(balanceTracks(groups));setErrors(failures.filter(Boolean))}
    }
   }

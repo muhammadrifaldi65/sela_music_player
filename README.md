@@ -4,7 +4,7 @@
 
 Sela menggabungkan pencarian musik YouTube, discovery dari YouTube Music, playlist lokal, lirik, dan Discord Rich Presence dalam aplikasi berbasis Tauri. Tidak perlu akun Sela atau backend aplikasi yang di-host sendiri. Playlist, antrean, riwayat, dan preferensi genre disimpan secara lokal menggunakan SQLite.
 
-**Status:** versi pengembangan `0.1.0`. Target utama Windows x64. Port Android masih dalam pengembangan; belum ada APK atau verifikasi playback Android.
+**Status:** versi pengembangan `0.1.1`. Target utama Windows x64. Port Android masih dalam pengembangan; belum ada APK atau verifikasi playback Android.
 
 ## Fitur
 
@@ -13,14 +13,19 @@ Sela menggabungkan pencarian musik YouTube, discovery dari YouTube Music, playli
 - **Discovery berdasarkan genre** — pilih genre saat pertama membuka aplikasi, lalu ubah preferensinya. Rekomendasi memakai pencarian genre, bukan klasifikasi genre terverifikasi atau machine learning perilaku.
 - **Playlist lokal** — buat, ubah nama, hapus, tambah/hapus lagu, atur urutan, dan putar seluruh playlist.
 - **Antrean pemutaran** — lihat, tambah, hapus, dan atur urutan lagu; antrean disimpan secara lokal.
-- **Kontrol audio** — putar/jeda, lagu sebelumnya/berikutnya, seek, volume, repeat sekali/lagu/antrean, dan opsi autoplay.
+- **Kontrol audio** — putar/jeda, sebelumnya/berikutnya (termasuk rekomendasi saat antrean habis), seek, volume responsif, repeat sekali/lagu/antrean, dan autoplay native yang tetap berjalan saat jendela diminimalkan. Kegagalan sementara dicoba ulang secara terbatas; pause manual tetap dihormati.
+- **Radio autoplay Windows** — saat antrean habis, mengambil kandidat radio YouTube Music berdasarkan lagu, menghindari ID/versi lagu dalam antrean dan 50 riwayat terakhir, serta memprioritaskan artis di luar tiga pemutaran terakhir. Urutan antrean manual tetap didahulukan; ini bukan salinan personalisasi akun YouTube Music.
 - **Riwayat mendengarkan** — tersimpan lintas sesi, dikelompokkan berdasarkan tanggal lokal.
 - **Lirik** — mengambil lirik dari LRCLIB, menyorot baris aktif pada lirik tersinkron, dan mendukung klik baris untuk seek jika timing tersedia.
-- **Now Playing** — tampilan artwork dan lirik yang diperluas dari pemutar bawah.
+- **Now Playing** — artwork dan lirik dengan latar blur serta panel kaca. Windows mendukung pilihan Audio/Video dalam halaman yang sama melalui libmpv; pergantian mempertahankan posisi, volume, dan status jeda. Video disembunyikan saat halaman ditutup atau tertutup panel lain. Android tetap audio.
 - **Discord Rich Presence** — tampilkan aktivitas mendengarkan; dapat dinyalakan/dimatikan melalui tombol Discord. Memerlukan Discord desktop berjalan.
 - **Antarmuka responsif** — sidebar ringkas, drawer antrean, dan navigasi untuk lebar layar kecil. `Ctrl+K` membuka pencarian.
+- **Pengaturan** — bahasa Indonesia/English, riwayat, tray, startup dan notifikasi opt-in, tampilan glass/glow, mode/volume awal, pintasan global, Discord, Last.fm, cache, dan impor/ekspor playlist. Preferensi disimpan lokal; konflik pintasan dilaporkan.
+- **Last.fm** — memerlukan kunci/rahasia aplikasi dan otorisasi akun melalui Settings. Kredensial Windows dilindungi DPAPI; pengiriman scrobble menggunakan waktu dengar aktual dan antrean retry lokal.
 
 Streaming, discovery, artwork, dan lirik memerlukan internet serta ketersediaan layanan sumber. Penyimpanan lokal bukan fitur unduh musik offline.
+
+Track antrean berikutnya disiapkan lebih awal bila tersedia; klik lagu langsung menampilkan status penyiapan. Lirik mulai disiapkan bersamaan dengan ekstraksi audio/video, tanpa menunggu panel lirik atau durasi media; hasil di-cache dan disesuaikan saat durasi tersedia. Respons penyedia tetap dapat terlambat atau terkena rate-limit. Animasi menghormati pengaturan reduced motion.
 
 ## Teknologi
 
@@ -124,15 +129,15 @@ docs/superpowers/       Spesifikasi dan rencana pengembangan
 
 - Database `sela.sqlite` dibuat di direktori data aplikasi melalui API `app_data_dir` Tauri, bukan di folder source.
 - Beberapa preferensi antarmuka/pemutaran tersimpan di localStorage WebView.
-- Tidak ada login aplikasi atau sinkronisasi akun/cloud.
-- Permintaan musik dan metadata menghubungi YouTube/YouTube Music; lirik menghubungi LRCLIB. Aktivitas lagu dikirim ke Discord ketika Rich Presence aktif.
+- Tidak ada akun Sela atau sinkronisasi playlist cloud. Last.fm opsional membutuhkan otorisasi akun terpisah.
+- Permintaan musik dan metadata menghubungi YouTube/YouTube Music; lirik menghubungi LRCLIB. Aktivitas lagu dikirim ke Discord ketika Rich Presence aktif dan Last.fm setelah akun dihubungkan.
 
 ## Batasan saat ini
 
 - Android belum selesai. Catatan pengembangan terakhir menyebut packaging APK terhambat izin symbolic link Windows; belum ada verifikasi playback Android.
 - Pemutaran file lokal memiliki implementasi native, tetapi alur dialog file belum terverifikasi end-to-end.
-- Keputusan auto-next memiliki pengujian, tetapi auto-next playback end-to-end belum terverifikasi.
-- Lirik per kata, terjemahan, video, scrobbling, dan pengaturan/lokalisasi lengkap belum tersedia.
+- Auto-next native telah diuji melalui EOF dan jendela diminimalkan; pengujian berjam-jam dan semua kondisi jaringan belum dilakukan.
+- Lirik per kata dan terjemahan isi lirik belum tersedia. UI Indonesia/English, video Windows, Settings, dan integrasi Last.fm sudah diimplementasikan; otorisasi Last.fm nyata memerlukan kredensial dan persetujuan pengguna.
 - Artwork playlist, lifecycle antrean lengkap, gapless playback, integrasi Windows, installer pada mesin bersih, dan update aplikasi masih memerlukan pengerjaan atau verifikasi.
 - Tampilan status ringkas Discord di member list belum terverifikasi secara langsung.
 - Packaging redistribusi beserta pemberitahuan lisensi runtime native belum selesai. Jangan menganggap build lokal sudah siap sebagai rilis publik.
@@ -149,4 +154,4 @@ Sebelum commit, periksa `git status` dan `git diff --cached`. `.gitignore` tidak
 
 ## Lisensi
 
-Lisensi untuk source aplikasi belum ditetapkan dalam repository ini. Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.
+Repository menyertakan GNU General Public License v3 pada `LICENSE`. Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.

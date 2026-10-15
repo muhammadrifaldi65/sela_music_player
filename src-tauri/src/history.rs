@@ -1,16 +1,7 @@
-use rusqlite::{Connection,params};
+use rusqlite::Connection;
 use serde::Serialize;
 #[derive(Serialize)]pub struct Listen{pub id:i64,pub video_id:String,pub title:String,pub artist:Option<String>,pub played_at:i64}
 pub fn initialize(db:&Connection)->rusqlite::Result<()>{db.execute_batch("CREATE TABLE IF NOT EXISTS history(id INTEGER PRIMARY KEY,session TEXT NOT NULL UNIQUE,video_id TEXT NOT NULL,title TEXT NOT NULL,artist TEXT,played_at INTEGER NOT NULL DEFAULT(unixepoch()));")}
-#[cfg(not(target_os = "android"))]
-#[tauri::command]
-pub fn record_listen(session:String,entry_id:i64,store:tauri::State<crate::Store>,player:tauri::State<std::sync::Mutex<crate::player::Player>>)->Result<(),String>{
- if session.is_empty()||session.len()>80{return Err("Sesi tidak valid".into())}
- let player=player.lock().map_err(|e|e.to_string())?;
- if player.number("time-pos")?.unwrap_or(0.0)<=0.0{return Err("Audio belum dimulai".into())}
- let db=store.0.lock().map_err(|e|e.to_string())?;
- db.execute("INSERT OR IGNORE INTO history(session,video_id,title,artist) SELECT ?1,video_id,title,channel FROM queue_entries WHERE id=?2",params![session,entry_id]).map_err(|e|e.to_string())?;Ok(())
-}
 #[tauri::command]
 pub fn listening_history(store:tauri::State<crate::Store>)->Result<Vec<Listen>,String>{
  let db=store.0.lock().map_err(|e|e.to_string())?;
