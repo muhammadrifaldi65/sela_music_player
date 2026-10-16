@@ -1,8 +1,86 @@
-import {useEffect,useState} from 'react';
-import {invoke} from '@tauri-apps/api/core';
-import {setLanguage} from './i18n';
-export type AppSettings={language:'system'|'id'|'en';startup:boolean;notifications:boolean;closeToTray:boolean;recordHistory:boolean;initialMode:'audio'|'video';initialVolume:number;appearance:{accent:string;background:string;blur:number;opacity:number;radius:number;glow:number;textSize:number;animations:boolean};hotkeys:{enabled:boolean;playPause:string;next:string;previous:string;volumeUp:string;volumeDown:string}};
-let saved:AppSettings|null=null;
-let request:Promise<AppSettings>|null=null;
-export function applySettings(settings:AppSettings){saved=settings;setLanguage(settings.language);const a=settings.appearance,root=document.documentElement;for(const [key,value] of Object.entries({'--accent':a.accent,'--canvas':a.background,'--glass-blur':`${a.blur}px`,'--panel-opacity':String(a.opacity),'--panel-radius':`${a.radius}px`,'--glow':String(a.glow/100),'--text-size':`${a.textSize}px`}))root.style.setProperty(key,value);root.dataset.animations=String(a.animations);window.dispatchEvent(new Event('settings-changed'))}
-export function useSettings(){const [settings,setSettings]=useState(saved),[error,setError]=useState<unknown>(null);useEffect(()=>{let active=true;const changed=()=>setSettings(saved);window.addEventListener('settings-changed',changed);request??=invoke<AppSettings>('get_app_settings').then(value=>{applySettings(value);return value}).catch(error=>{request=null;throw error});void request.catch(error=>{if(active)setError(error)});return()=>{active=false;window.removeEventListener('settings-changed',changed)}},[]);return {settings,error,save:async(value:AppSettings)=>{const result=await invoke<AppSettings>('save_app_settings',{settings:value});applySettings(result);setError(null)}}}
+import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { setLanguage } from "./i18n";
+export type AppSettings = {
+  language: "system" | "id" | "en";
+  startup: boolean;
+  notifications: boolean;
+  closeToTray: boolean;
+  recordHistory: boolean;
+  initialMode: "audio" | "video";
+  initialVolume: number;
+  appearance: {
+    accent: string;
+    background: string;
+    blur: number;
+    opacity: number;
+    radius: number;
+    glow: number;
+    textSize: number;
+    animations: boolean;
+  };
+  hotkeys: {
+    enabled: boolean;
+    playPause: string;
+    next: string;
+    previous: string;
+    volumeUp: string;
+    volumeDown: string;
+  };
+};
+let saved: AppSettings | null = null;
+let request: Promise<AppSettings> | null = null;
+export function applySettings(settings: AppSettings) {
+  saved = settings;
+  setLanguage(settings.language);
+  const a = settings.appearance,
+    root = document.documentElement;
+  for (const [key, value] of Object.entries({
+    "--accent": a.accent,
+    "--canvas": a.background,
+    "--glass-blur": `${a.blur}px`,
+    "--panel-opacity": String(a.opacity),
+    "--panel-radius": `${a.radius}px`,
+    "--glow": String(a.glow / 100),
+    "--text-size": `${a.textSize}px`,
+  }))
+    root.style.setProperty(key, value);
+  root.dataset.animations = String(a.animations);
+  window.dispatchEvent(new Event("settings-changed"));
+}
+export function useSettings() {
+  const [settings, setSettings] = useState(saved),
+    [error, setError] = useState<unknown>(null);
+  useEffect(() => {
+    let active = true;
+    const changed = () => setSettings(saved);
+    window.addEventListener("settings-changed", changed);
+    request ??= invoke<AppSettings>("get_app_settings")
+      .then((value) => {
+        applySettings(value);
+        return value;
+      })
+      .catch((error) => {
+        request = null;
+        throw error;
+      });
+    void request.catch((error) => {
+      if (active) setError(error);
+    });
+    return () => {
+      active = false;
+      window.removeEventListener("settings-changed", changed);
+    };
+  }, []);
+  return {
+    settings,
+    error,
+    save: async (value: AppSettings) => {
+      const result = await invoke<AppSettings>("save_app_settings", {
+        settings: value,
+      });
+      applySettings(result);
+      setError(null);
+    },
+  };
+}

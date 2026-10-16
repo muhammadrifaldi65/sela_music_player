@@ -1,21 +1,40 @@
-import {strict as assert} from 'node:assert';
-import {createVolumeWriter} from '../src/volume.ts';
-const writes:number[]=[],errors:unknown[]=[];
-let pending=Promise.withResolvers<void>();
-let written=Promise.withResolvers<void>();
-const writer=createVolumeWriter(value=>{writes.push(value);written.resolve();return pending.promise},error=>errors.push(error));
-writer.set(20);writer.set(40);writer.set(65);
-assert.deepEqual(writes,[20]);
-assert.equal(writer.busy,true);
-const first=pending;pending=Promise.withResolvers<void>();written=Promise.withResolvers<void>();
-first.resolve();await written.promise;
-assert.deepEqual(writes,[20,65]);
+import { strict as assert } from "node:assert";
+import { createVolumeWriter } from "../src/volume.ts";
+const writes: number[] = [],
+  errors: unknown[] = [];
+let pending = Promise.withResolvers<void>();
+let written = Promise.withResolvers<void>();
+const writer = createVolumeWriter(
+  (value) => {
+    writes.push(value);
+    written.resolve();
+    return pending.promise;
+  },
+  (error) => errors.push(error),
+);
+writer.set(20);
+writer.set(40);
+writer.set(65);
+assert.deepEqual(writes, [20]);
+assert.equal(writer.busy, true);
+const first = pending;
+pending = Promise.withResolvers<void>();
+written = Promise.withResolvers<void>();
+first.resolve();
+await written.promise;
+assert.deepEqual(writes, [20, 65]);
 writer.set(75);
-const second=pending;pending=Promise.withResolvers<void>();written=Promise.withResolvers<void>();
-second.reject(new Error('device failure'));await written.promise;
-assert.deepEqual(writes,[20,65,75]);
-assert.equal(errors.length,1);
-pending.resolve();await pending.promise;
-assert.equal(writer.busy,false);
-assert.equal(writer.revision,4);
-console.log('Volume writes serialize, coalesce and preserve final value after failure');
+const second = pending;
+pending = Promise.withResolvers<void>();
+written = Promise.withResolvers<void>();
+second.reject(new Error("device failure"));
+await written.promise;
+assert.deepEqual(writes, [20, 65, 75]);
+assert.equal(errors.length, 1);
+pending.resolve();
+await pending.promise;
+assert.equal(writer.busy, false);
+assert.equal(writer.revision, 4);
+console.log(
+  "Volume writes serialize, coalesce and preserve final value after failure",
+);

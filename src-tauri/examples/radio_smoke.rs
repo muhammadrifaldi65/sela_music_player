@@ -20,10 +20,15 @@ fn main() -> Result<(), String> {
         }
         let mut recent = Vec::new();
         for _ in 0..5 {
-            let Some(chosen) = recommendations::choose(&seed, candidates.clone(), &[], &recent) else {
+            let Some(chosen) = recommendations::choose(&seed, candidates.clone(), &[], &recent)
+            else {
                 break;
             };
-            println!("{} — {}", chosen.title, chosen.channel.as_deref().unwrap_or("Unknown artist"));
+            println!(
+                "{} — {}",
+                chosen.title,
+                chosen.channel.as_deref().unwrap_or("Unknown artist")
+            );
             candidates.retain(|track| track.id != chosen.id);
             recent.insert(0, chosen);
         }

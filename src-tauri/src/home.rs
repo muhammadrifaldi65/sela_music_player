@@ -17,7 +17,12 @@ fn source_shelf<'a>(value: &'a Value, category: &str) -> Option<&'a Vec<Value>> 
         let shelf = section.get("musicCarouselShelfRenderer")?;
         let header = shelf.pointer("/header/musicCarouselShelfBasicHeaderRenderer/title/runs/0")?;
         let matches = match category {
-            "new-releases" => header.pointer("/navigationEndpoint/browseEndpoint/browseId").and_then(Value::as_str) == Some("FEmusic_new_releases_albums"),
+            "new-releases" => {
+                header
+                    .pointer("/navigationEndpoint/browseEndpoint/browseId")
+                    .and_then(Value::as_str)
+                    == Some("FEmusic_new_releases_albums")
+            }
             "trending" => header.get("text").and_then(Value::as_str) == Some("Trending"),
             _ => false,
         };
@@ -27,13 +32,25 @@ fn source_shelf<'a>(value: &'a Value, category: &str) -> Option<&'a Vec<Value>> 
 
 fn append_tracks(items: &[Value], tracks: &mut Vec<Track>) {
     for item in items {
-        if tracks.len() >= 24 { break; }
+        if tracks.len() >= 24 {
+            break;
+        }
         let fields = if let Some(row) = item.get("musicResponsiveListItemRenderer") {
-            if row.get("musicItemRendererDisplayPolicy").and_then(Value::as_str) == Some("MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT") { continue; }
+            if row
+                .get("musicItemRendererDisplayPolicy")
+                .and_then(Value::as_str)
+                == Some("MUSIC_ITEM_RENDERER_DISPLAY_POLICY_GREY_OUT")
+            {
+                continue;
+            }
             (
                 row.pointer("/playlistItemData/videoId"),
-                row.pointer("/flexColumns/0/musicResponsiveListItemFlexColumnRenderer/text/runs/0/text"),
-                row.pointer("/flexColumns/1/musicResponsiveListItemFlexColumnRenderer/text/runs/0/text"),
+                row.pointer(
+                    "/flexColumns/0/musicResponsiveListItemFlexColumnRenderer/text/runs/0/text",
+                ),
+                row.pointer(
+                    "/flexColumns/1/musicResponsiveListItemFlexColumnRenderer/text/runs/0/text",
+                ),
             )
         } else if let Some(row) = item.get("musicTwoRowItemRenderer") {
             (
@@ -41,10 +58,19 @@ fn append_tracks(items: &[Value], tracks: &mut Vec<Track>) {
                 row.pointer("/title/runs/0/text"),
                 row.pointer("/subtitle/runs/0/text"),
             )
-        } else { continue; };
-        if let (Some(id), Some(title)) = (fields.0.and_then(Value::as_str), fields.1.and_then(Value::as_str)) {
+        } else {
+            continue;
+        };
+        if let (Some(id), Some(title)) = (
+            fields.0.and_then(Value::as_str),
+            fields.1.and_then(Value::as_str),
+        ) {
             if !id.is_empty() && !title.is_empty() && !tracks.iter().any(|track| track.id == id) {
-                tracks.push(Track { id: id.into(), title: title.into(), channel: fields.2.and_then(Value::as_str).map(str::to_owned) });
+                tracks.push(Track {
+                    id: id.into(),
+                    title: title.into(),
+                    channel: fields.2.and_then(Value::as_str).map(str::to_owned),
+                });
             }
         }
     }
@@ -74,15 +100,29 @@ async fn browse(client: &reqwest::Client, id: &str) -> Result<Value, String> {
 pub async fn music_home() -> Result<Vec<HomeShelf>, String> {
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(8))
-        .user_agent("Mozilla/5.0").build().map_err(|e| e.to_string())?;
+        .user_agent("Mozilla/5.0")
+        .build()
+        .map_err(|e| e.to_string())?;
     let mut shelves = vec![
-        HomeShelf { id: "new-releases", title: "New releases", items: Vec::new(), error: None },
-        HomeShelf { id: "trending", title: "Trending", items: Vec::new(), error: None },
+        HomeShelf {
+            id: "new-releases",
+            title: "New releases",
+            items: Vec::new(),
+            error: None,
+        },
+        HomeShelf {
+            id: "trending",
+            title: "Trending",
+            items: Vec::new(),
+            error: None,
+        },
     ];
     let explore = match browse(&client, "FEmusic_explore").await {
         Ok(value) => value,
         Err(error) => {
-            for shelf in &mut shelves { shelf.error = Some(error.clone()); }
+            for shelf in &mut shelves {
+                shelf.error = Some(error.clone());
+            }
             return Ok(shelves);
         }
     };
@@ -96,21 +136,32 @@ pub async fn music_home() -> Result<Vec<HomeShelf>, String> {
             // ponytail: first three source albums, no continuations; expand only if pagination is needed.
             let mut albums = Vec::new();
             for item in items {
-                let Some(endpoint) = item.pointer("/musicTwoRowItemRenderer/navigationEndpoint/browseEndpoint") else { continue; };
+                let Some(endpoint) =
+                    item.pointer("/musicTwoRowItemRenderer/navigationEndpoint/browseEndpoint")
+                else {
+                    continue;
+                };
                 if endpoint.pointer("/browseEndpointContextSupportedConfigs/browseEndpointContextMusicConfig/pageType").and_then(Value::as_str) != Some("MUSIC_PAGE_TYPE_ALBUM") { continue; }
                 if let Some(id) = endpoint.get("browseId").and_then(Value::as_str) {
-                    if !albums.contains(&id) { albums.push(id); }
+                    if !albums.contains(&id) {
+                        albums.push(id);
+                    }
                 }
-                if albums.len() == 3 { break; }
+                if albums.len() == 3 {
+                    break;
+                }
             }
             for id in albums {
-                if shelf.items.len() >= 24 { break; }
+                if shelf.items.len() >= 24 {
+                    break;
+                }
                 match browse(&client, id).await {
                     Ok(album) => {
                         let previous = shelf.items.len();
                         append_album_tracks(&album, &mut shelf.items);
                         if previous == shelf.items.len() && shelf.items.is_empty() {
-                            shelf.error = Some("A new release did not provide playable songs".into());
+                            shelf.error =
+                                Some("A new release did not provide playable songs".into());
                         }
                     }
                     Err(error) => shelf.error = Some(error),
@@ -136,14 +187,17 @@ mod tests {
             }}]
         }});
         let mut unrelated = song.clone();
-        unrelated["musicResponsiveListItemRenderer"]["playlistItemData"]["videoId"] = json!("unrelated-song");
-        let carousel = |title: &str, browse_id: &str, contents: Value| json!({
-            "musicCarouselShelfRenderer": {
-                "header": {"musicCarouselShelfBasicHeaderRenderer": {"title": {"runs": [{
-                    "text": title, "navigationEndpoint": {"browseEndpoint": {"browseId": browse_id}}
-                }]}}}, "contents": contents
-            }
-        });
+        unrelated["musicResponsiveListItemRenderer"]["playlistItemData"]["videoId"] =
+            json!("unrelated-song");
+        let carousel = |title: &str, browse_id: &str, contents: Value| {
+            json!({
+                "musicCarouselShelfRenderer": {
+                    "header": {"musicCarouselShelfBasicHeaderRenderer": {"title": {"runs": [{
+                        "text": title, "navigationEndpoint": {"browseEndpoint": {"browseId": browse_id}}
+                    }]}}}, "contents": contents
+                }
+            })
+        };
         let value = json!({"contents": {"singleColumnBrowseResultsRenderer": {"tabs": [{
             "tabRenderer": {"content": {"sectionListRenderer": {"contents": [
                 carousel("Recommended", "unrelated", json!([unrelated.clone()])),
@@ -173,5 +227,4 @@ mod tests {
         assert_eq!(album_tracks.len(), 1);
         assert_eq!(album_tracks[0].id, "actual-song");
     }
-
 }

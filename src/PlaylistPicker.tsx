@@ -1,11 +1,121 @@
-import {useTranslation,t as tr,errorText} from './i18n';
-import {useEffect,useRef,useState} from 'react';
-import {invoke} from '@tauri-apps/api/core';
-import {type Track} from './playback';
-export function PlaylistPicker({track,onClose,onAdded}:{track:Track;onClose:()=>void;onAdded:()=>void}){
- const {t:tr,locale}=useTranslation();
- const dialog=useRef<HTMLDialogElement>(null),[lists,setLists]=useState<{id:number;name:string}[]>([]),[name,setName]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
- useEffect(()=>{const element=dialog.current!;const previous=document.activeElement as HTMLElement|null;element.showModal();let active=true;void invoke<{id:number;name:string}[]>('playlists').then(rows=>{if(active)setLists(rows)}).catch(e=>{if(active)setError(errorText(e))});return()=>{active=false;element.close();previous?.focus()}},[]);
- async function add(id:number){setBusy(true);setError('');try{await invoke('add_track',{playlistId:id,track:{...track,channel:track.channel??null}});window.dispatchEvent(new Event('library-changed'));onAdded();onClose()}catch(e){setError(errorText(e))}finally{setBusy(false)}}
- return <dialog ref={dialog} className="playlist-picker" aria-labelledby="playlist-picker-title" onCancel={event=>{event.preventDefault();if(!busy)onClose()}}><div className="shelf-heading"><h2 id="playlist-picker-title">{tr("Tambah ke playlist")}</h2><button disabled={busy} onClick={onClose} aria-label={tr("Tutup pilihan playlist")}>×</button></div><p>{track.title}</p>{error&&<p role="alert">{error}</p>}<div className="playlist-choices">{lists.map(list=><button key={list.id} disabled={busy} onClick={()=>void add(list.id)}>{list.name}</button>)}</div>{!lists.length&&<p>{tr("Buat playlist untuk menyimpan lagu ini.")}</p>}<form onSubmit={async event=>{event.preventDefault();setBusy(true);setError('');try{const id=await invoke<number>('create_playlist',{name});setLists(rows=>[{id,name:name.trim()},...rows]);setName('');window.dispatchEvent(new Event('library-changed'));await add(id)}catch(e){setError(errorText(e));setBusy(false)}}}><label htmlFor="new-playlist-name">{tr('Playlist baru')}</label><input id="new-playlist-name" required maxLength={120} value={name} disabled={busy} onChange={event=>setName(event.target.value)}/><button disabled={busy||!name.trim()}>{tr("Buat dan tambahkan")}</button></form></dialog>
+import { useTranslation, t as tr, errorText } from "./i18n";
+import { useEffect, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { type Track } from "./playback";
+export function PlaylistPicker({
+  track,
+  onClose,
+  onAdded,
+}: {
+  track: Track;
+  onClose: () => void;
+  onAdded: () => void;
+}) {
+  const { t: tr, locale } = useTranslation();
+  const dialog = useRef<HTMLDialogElement>(null),
+    [lists, setLists] = useState<{ id: number; name: string }[]>([]),
+    [name, setName] = useState(""),
+    [error, setError] = useState(""),
+    [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const element = dialog.current!;
+    const previous = document.activeElement as HTMLElement | null;
+    element.showModal();
+    let active = true;
+    void invoke<{ id: number; name: string }[]>("playlists")
+      .then((rows) => {
+        if (active) setLists(rows);
+      })
+      .catch((e) => {
+        if (active) setError(errorText(e));
+      });
+    return () => {
+      active = false;
+      element.close();
+      previous?.focus();
+    };
+  }, []);
+  async function add(id: number) {
+    setBusy(true);
+    setError("");
+    try {
+      await invoke("add_track", {
+        playlistId: id,
+        track: { ...track, channel: track.channel ?? null },
+      });
+      window.dispatchEvent(new Event("library-changed"));
+      onAdded();
+      onClose();
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <dialog
+      ref={dialog}
+      className="playlist-picker"
+      aria-labelledby="playlist-picker-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        if (!busy) onClose();
+      }}
+    >
+      <div className="shelf-heading">
+        <h2 id="playlist-picker-title">{tr("Tambah ke playlist")}</h2>
+        <button
+          disabled={busy}
+          onClick={onClose}
+          aria-label={tr("Tutup pilihan playlist")}
+        >
+          ×
+        </button>
+      </div>
+      <p>{track.title}</p>
+      {error && <p role="alert">{error}</p>}
+      <div className="playlist-choices">
+        {lists.map((list) => (
+          <button
+            key={list.id}
+            disabled={busy}
+            onClick={() => void add(list.id)}
+          >
+            {list.name}
+          </button>
+        ))}
+      </div>
+      {!lists.length && <p>{tr("Buat playlist untuk menyimpan lagu ini.")}</p>}
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          setBusy(true);
+          setError("");
+          try {
+            const id = await invoke<number>("create_playlist", { name });
+            setLists((rows) => [{ id, name: name.trim() }, ...rows]);
+            setName("");
+            window.dispatchEvent(new Event("library-changed"));
+            await add(id);
+          } catch (e) {
+            setError(errorText(e));
+            setBusy(false);
+          }
+        }}
+      >
+        <label htmlFor="new-playlist-name">{tr("Playlist baru")}</label>
+        <input
+          id="new-playlist-name"
+          required
+          maxLength={120}
+          value={name}
+          disabled={busy}
+          onChange={(event) => setName(event.target.value)}
+        />
+        <button disabled={busy || !name.trim()}>
+          {tr("Buat dan tambahkan")}
+        </button>
+      </form>
+    </dialog>
+  );
 }
