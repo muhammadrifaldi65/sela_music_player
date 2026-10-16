@@ -12,6 +12,9 @@ type NativeState = {
   status: "idle" | "loading" | "ready" | "unavailable" | "error";
   result: LyricResult | null;
   error: string | null;
+  resolvedProvider?: string | null;
+  selectedProvider?: string;
+  providers?: { id: string; name: string; status: string; error?: string | null; synced: boolean }[];
 };
 export type LyricLine = { time: number; text: string };
 type Snapshot = NativeState & { lines: LyricLine[] };
@@ -78,7 +81,7 @@ async function refresh() {
       void refresh();
       return;
     }
-    if (snapshot.status === "loading" || snapshot.status === "idle")
+    if (snapshot.status === "loading" || snapshot.status === "idle" || snapshot.providers?.some((provider) => provider.status === "loading"))
       timer = window.setTimeout(() => void refresh(), 1000);
     else if (snapshot.status === "error" || snapshot.status === "unavailable") {
       timer = window.setTimeout(
@@ -152,6 +155,24 @@ function update() {
       void refresh();
     }
   }
+}
+export async function selectLyricProvider(provider: string, retry = false) {
+  const trackId = snapshot.trackId, request = generation;
+  if (!trackId) return;
+  await invoke("select_lyric_provider", { trackId, provider, retry });
+  if (request !== generation || snapshot.trackId !== trackId) return;
+  generation++;
+  clearTimeout(timer);
+  await refresh();
+}
+export async function searchLyricsOverride(title: string, artist: string) {
+  const trackId = snapshot.trackId, request = generation;
+  if (!trackId) return;
+  await invoke("search_lyrics_override", { trackId, title, artist });
+  if (request !== generation || snapshot.trackId !== trackId) return;
+  generation++;
+  clearTimeout(timer);
+  await refresh();
 }
 export function initializeLyrics() {
   if (initialized) return;

@@ -1,12 +1,12 @@
 {
   "name": "sela",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc && vite build",
-    "test": "node --experimental-strip-types tests/advance.test.ts && node --experimental-strip-types tests/genres.test.ts && node --experimental-strip-types tests/volume.test.ts && node --experimental-strip-types tests/playback.test.ts && node --experimental-strip-types tests/translations.test.ts",
+    "test": "node --experimental-strip-types tests/advance.test.ts && node --experimental-strip-types tests/genres.test.ts && node --experimental-strip-types tests/volume.test.ts && node --experimental-strip-types tests/playback.test.ts && node --experimental-strip-types tests/translations.test.ts && node --experimental-strip-types tests/lyrics.test.ts",
     "tauri": "tauri"
   },
   "dependencies": {

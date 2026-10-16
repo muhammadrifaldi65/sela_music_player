@@ -1,9 +1,10 @@
 import { useTranslation, t as tr, errorText } from "./i18n";
-import { useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { playTrack, type Track } from "./playback";
 import { PlaylistPicker } from "./PlaylistPicker";
 import { useGenreDiscovery } from "./GenreDiscovery";
+import { CommunityPlaylists } from "./CommunityPlaylists";
 type HomeShelf = { id: string; title: string; items: Track[]; error?: string };
 const categories = [
   {
@@ -29,8 +30,35 @@ function scrollShelf(id: string, direction: number) {
   });
 }
 export function Home() {
+  const { t: tr } = useTranslation();
+  const [generation, setGeneration] = useState(0);
+  const [busy, setBusy] = useState(true);
+  const refreshing = useRef(true);
+  const reportLoading = useCallback((loading: boolean) => {
+    refreshing.current = loading;
+    setBusy(loading);
+  }, []);
+  return (
+    <>
+      <div className="home-chips">
+        <button type="button" disabled={busy} aria-label={tr("Segarkan Home")} aria-busy={busy} onClick={() => {
+          if (refreshing.current) return;
+          refreshing.current = true;
+          setBusy(true);
+          setGeneration((value) => value + 1);
+        }}>
+          {busy ? tr("Memuat…") : tr("Segarkan Home")}
+        </button>
+      </div>
+      <HomeContent key={generation} onLoadingChange={reportLoading} />
+    </>
+  );
+}
+function HomeContent({ onLoadingChange }: { onLoadingChange: (loading: boolean) => void }) {
   const { t: tr, locale } = useTranslation();
   const recommendations = useGenreDiscovery();
+  const [libraryLoading, setLibraryLoading] = useState(true);
+  const [communityLoading, setCommunityLoading] = useState(true);
   const [feed, setFeed] = useState<HomeShelf[]>([]),
     [recent, setRecent] = useState<Track[]>([]),
     [lists, setLists] = useState<{ id: number; name: string }[]>([]),
@@ -39,6 +67,11 @@ export function Home() {
     [filter, setFilter] = useState("Semua"),
     [destination, setDestination] = useState<Track | null>(null),
     [notice, setNotice] = useState("");
+  const busy = loading || libraryLoading || recommendations.loading ||
+    (filter === "Semua" && communityLoading);
+  useEffect(() => {
+    onLoadingChange(busy);
+  }, [busy, onLoadingChange]);
   async function load() {
     setLoading(true);
     setError("");
@@ -54,15 +87,19 @@ export function Home() {
     void load();
     let active = true;
     const update = () => {
-      void Promise.all([
+      void Promise.allSettled([
         invoke<Listen[]>("listening_history"),
         invoke<{ id: number; name: string }[]>("playlists"),
       ])
         .then(([history, playlists]) => {
           if (!active) return;
+          const failures = [history, playlists].flatMap((result) =>
+            result.status === "rejected" ? [errorText(result.reason)] : [],
+          );
+          if (failures.length) setError(failures.join(" "));
           const seen = new Set<string>();
           setRecent(
-            history
+            (history.status === "fulfilled" ? history.value : [])
               .filter((r) => {
                 if (seen.has(r.video_id)) return false;
                 seen.add(r.video_id);
@@ -75,10 +112,13 @@ export function Home() {
                 channel: r.artist,
               })),
           );
-          setLists(playlists);
+          if (playlists.status === "fulfilled") setLists(playlists.value);
         })
         .catch((e) => {
           if (active) setError(errorText(e));
+        })
+        .finally(() => {
+          if (active) setLibraryLoading(false);
         });
     };
     update();
@@ -126,7 +166,7 @@ export function Home() {
               ]
             : publicShelves.filter((shelf) => shelf.title === filter);
   return (
-    <section className="music-home" aria-busy={loading}>
+    <section className="music-home" aria-busy={busy}>
       <div className="home-chips" aria-label={tr("Filter Home")}>
         {[
           "Semua",
@@ -168,6 +208,7 @@ export function Home() {
         {notice}
       </p>
       {shelves.map((shelf) => (
+        <Fragment key={shelf.id}>
         <section
           className="music-shelf"
           key={shelf.id}
@@ -362,6 +403,8 @@ export function Home() {
             </>
           )}
         </section>
+        {filter === "Semua" && shelf.id === "for-you" && <CommunityPlaylists onLoadingChange={setCommunityLoading} />}
+        </Fragment>
       ))}
       {filter === "Koleksi" && (
         <section className="music-shelf">

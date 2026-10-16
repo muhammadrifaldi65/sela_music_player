@@ -1,3 +1,4 @@
+mod community;
 #[cfg(not(target_os = "android"))]
 mod data_management;
 #[cfg(not(target_os = "android"))]
@@ -64,7 +65,7 @@ fn playlists(store: tauri::State<Store>) -> Result<Vec<Playlist>, String> {
 fn create_playlist(name: String, store: tauri::State<Store>) -> Result<i64, String> {
     let name = name.trim();
     if name.is_empty() || name.chars().count() > 120 {
-        return Err("Nama playlist harus 1â€“120 karakter".into());
+        return Err("Nama playlist harus 1–120 karakter".into());
     }
     let db = store.0.lock().map_err(|e| e.to_string())?;
     db.execute("INSERT INTO playlists(name) VALUES (?1)", params![name])
@@ -122,7 +123,7 @@ fn remove_track(entry_id: i64, store: tauri::State<Store>) -> Result<(), String>
 fn rename_playlist(id: i64, name: String, store: tauri::State<Store>) -> Result<(), String> {
     let name = name.trim();
     if name.is_empty() || name.chars().count() > 120 {
-        return Err("Nama playlist harus 1â€“120 karakter".into());
+        return Err("Nama playlist harus 1–120 karakter".into());
     }
     let changed = store
         .0
@@ -305,8 +306,13 @@ pub fn run() {
         current_queue_entry,
         history::listening_history,
         home::music_home,
+        community::community_playlists,
+        community::community_playlist_tracks,
+        community::save_community_playlist,
         lyrics::prepare_lyrics,
         lyrics::lyric_state,
+        lyrics::select_lyric_provider,
+        lyrics::search_lyrics_override,
         discord::discord_connect,
         discord::discord_clear,
         discord::discord_update,
@@ -360,8 +366,13 @@ pub fn run() {
         current_queue_entry,
         history::listening_history,
         home::music_home,
+        community::community_playlists,
+        community::community_playlist_tracks,
+        community::save_community_playlist,
         lyrics::prepare_lyrics,
         lyrics::lyric_state,
+        lyrics::select_lyric_provider,
+        lyrics::search_lyrics_override,
         playback_next,
         playback_previous,
         set_playback_options,

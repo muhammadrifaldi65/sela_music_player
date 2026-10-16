@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { usePreferences } from "./Genres";
 import { balanceTracks } from "./genreTracks";
 import type { Track } from "./playback";
+import { discoveryChoice } from "./discoveryRotation";
 
 export function useGenreDiscovery() {
   const { genres, selected, edit } = usePreferences();
@@ -29,7 +30,7 @@ export function useGenreDiscovery() {
           genre = chosen[index];
         try {
           const result = await invoke<{ entries?: unknown[] }>("search", {
-            query: genre.query,
+            query: `${genre.query} ${discoveryChoice(`genre:${genre.id}`, ["", "official audio", "live acoustic", "new releases", "music video"])}`.trim(),
           });
           if (!Array.isArray(result.entries))
             throw new Error(t("Respons pencarian tidak valid."));

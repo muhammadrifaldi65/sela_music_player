@@ -1,11 +1,15 @@
-import { useTranslation, t as tr, errorText } from "./i18n";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useTranslation, errorText } from "./i18n";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { playback, platform, changePlayback } from "./playback";
 import { Lyrics } from "./Lyrics";
+import { Queue } from "./Queue";
+import { Icon } from "./Icon";
+import "./PlayerLyrics.css";
 export function NowPlaying() {
-  const { t: tr, locale } = useTranslation();
-  const [open, setOpen] = useState(false),
+  const { t: tr } = useTranslation();
+  const [tab, setTab] = useState<"queue" | "lyrics">("lyrics");
+  const [phase, setPhase] = useState<"closed" | "entering" | "open" | "closing">("closed"),
     [, refresh] = useState(0),
     [desktop, setDesktop] = useState(false),
     [switching, setSwitching] = useState(false),
@@ -14,20 +18,37 @@ export function NowPlaying() {
     surface = useRef<HTMLDivElement>(null),
     panel = useRef<HTMLElement>(null);
   const surfaceWrites = useRef(Promise.resolve());
+  const open = phase !== "closed";
   const track = playback.selected ?? playback.current?.track;
+  useLayoutEffect(() => {
+    if (phase !== "entering" && phase !== "closing") return;
+    let active = true;
+    // Follow the CSS duration, including reduced motion; ignore interrupted runs.
+    const animations = panel.current?.getAnimations() ?? [];
+    void Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
+      if (active) setPhase(phase === "closing" ? "closed" : "open");
+    });
+    return () => { active = false; };
+  }, [phase]);
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
     back.current?.focus();
+    const shell = document.querySelector<HTMLElement>(".shell");
+    if (shell) shell.inert = true;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const key = (event: KeyboardEvent) => {
       if (event.key === "Escape" && !document.querySelector("dialog[open]")) {
         event.preventDefault();
-        setOpen(false);
+        setPhase((value) => value === "closed" ? value : "closing");
       }
     };
     window.addEventListener("keydown", key);
     return () => {
       window.removeEventListener("keydown", key);
+      if (shell) shell.inert = false;
+      document.body.style.overflow = overflow;
       previous?.focus();
     };
   }, [open]);
@@ -36,7 +57,9 @@ export function NowPlaying() {
       .then((value) => setDesktop(value !== "android"))
       .catch((e) => setError(errorText(e)));
     const show = () => {
-      if (playback.current || playback.selected) setOpen((v) => !v);
+      if (playback.current || playback.selected) {
+        setPhase((value) => value === "closed" || value === "closing" ? "entering" : "closing");
+      }
     };
     const changed = () => refresh((v) => v + 1);
     window.addEventListener("toggle-now-playing", show);
@@ -46,8 +69,8 @@ export function NowPlaying() {
       window.removeEventListener("playback-changed", changed);
     };
   }, []);
-  useEffect(() => {
-    if (!desktop || !open || !surface.current) return;
+  useLayoutEffect(() => {
+    if (!desktop || phase !== "open" || !surface.current) return;
     let frame = 0,
       alive = true,
       busy = false;
@@ -67,6 +90,7 @@ export function NowPlaying() {
           const bounds = pending;
           pending = null;
           surfaceWrites.current = surfaceWrites.current.then(async () => {
+            if (!alive) return;
             try {
               await invoke("set_video_bounds", bounds);
             } catch (e) {
@@ -151,19 +175,24 @@ export function NowPlaying() {
         }
       });
     };
-  }, [desktop, open, !!track]);
+  }, [desktop, phase, !!track]);
   if (!open || !track) return null;
   const artwork = `https://i.ytimg.com/vi/${track.id}/hqdefault.jpg`;
   return (
     <section
       ref={panel}
-      className="expanded-player"
+      className={`expanded-player is-${phase}`}
       style={{ "--artwork": `url("${artwork}")` } as CSSProperties}
       aria-label={tr("Sedang diputar")}
+      role="region"
     >
-      <button ref={back} className="back-player" onClick={() => setOpen(false)}>
-        {tr("Kembali")}
-      </button>
+      <div className="expanded-header">
+        <button ref={back} className="back-player" onClick={() => setPhase("closing")}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>{tr("Kembali")}
+        </button>
+        <span>{tr("Sedang diputar")}</span>
+        <span className="expanded-brand">Sela</span>
+      </div>
       <div className="expanded-columns">
         <div className="expanded-art">
           {desktop && (
@@ -215,7 +244,13 @@ export function NowPlaying() {
           <h2>{track.title}</h2>
           <p>{track.channel}</p>
         </div>
-        <Lyrics />
+        <aside className="player-sidebar">
+          <div className="player-tabs" role="group" aria-label={tr("Tampilan pemutar")}>
+            <button aria-pressed={tab === "queue"} onClick={() => setTab("queue")}><Icon name="queue" />{tr("Antrean")}</button>
+            <button aria-pressed={tab === "lyrics"} onClick={() => setTab("lyrics")}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3Zm-6-4v1a6 6 0 0 0 12 0v-1M12 18v4m-4 0h8" /></svg>{tr("Lirik")}</button>
+          </div>
+          {tab === "lyrics" ? <Lyrics key={track.id} /> : <Queue />}
+        </aside>
       </div>
     </section>
   );

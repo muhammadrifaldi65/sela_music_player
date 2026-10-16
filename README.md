@@ -6,22 +6,27 @@
 
 Sela menggabungkan pencarian musik YouTube, discovery dari YouTube Music, playlist lokal, lirik, dan Discord Rich Presence dalam aplikasi berbasis Tauri. Tidak perlu akun Sela atau backend aplikasi yang di-host sendiri. Playlist, antrean, riwayat, dan preferensi genre disimpan secara lokal menggunakan SQLite.
 
-**Status:** versi pengembangan `0.1.1`. Target utama Windows x64. Port Android masih dalam pengembangan; belum ada APK atau verifikasi playback Android.
+**Status:** versi pengembangan `0.1.2`. Target utama Windows x64. Port Android masih dalam pengembangan; belum ada APK atau verifikasi playback Android.
 
 ## Fitur
 
-- **Cari dan putar musik** — pencarian YouTube dengan streaming audio melalui yt-dlp dan libmpv.
+- **Cari dan putar musik** — pencarian YouTube dengan streaming audio melalui yt-dlp dan libmpv; halaman Search berisi rekomendasi bergambar, pilihan suasana, serta riwayat pencarian lokal yang bisa dihapus.
 - **Home musik** — rekomendasi, rilisan baru, dan trending dari sumber YouTube Music; kategori Explore menggunakan wilayah Indonesia.
 - **Discovery berdasarkan genre** — pilih genre saat pertama membuka aplikasi, lalu ubah preferensinya. Rekomendasi memakai pencarian genre, bukan klasifikasi genre terverifikasi atau machine learning perilaku.
 - **Playlist lokal** — buat, ubah nama, hapus, tambah/hapus lagu, atur urutan, dan putar seluruh playlist.
+- **Playlist komunitas YouTube Music** — tersedia langsung di Home (filter Semua) dan tab Komunitas: jelajah dan cari playlist publik, buka seluruh lagu termasuk halaman lanjutan, putar lagu atau tambahkan seluruh playlist ke antrean, serta simpan salinan lokal secara atomik. Playlist privat/tidak tersedia menampilkan kesalahan; koleksi lokal tidak otomatis sinkron dengan perubahan sumber.
+  Urutan Home: Untuk kamu, Playlist komunitas, New releases, Trending, lalu Putar lagi jika ada riwayat. Kartu Playlist saya memakai cover gradasi, judul konsisten, serta baris tindakan ubah nama/hapus terpisah.
+  Refresh Home memuat ulang rekomendasi, rilisan, trending, playlist komunitas, dan riwayat tanpa memuat ulang jendela aplikasi: lagu aktif, posisi pemutaran, dan antrean tetap berjalan. Refresh mengganti variasi pencarian genre Untuk kamu dan tema discovery komunitas secara bergilir dalam sesi aplikasi. Pencarian manual tetap memakai kata kunci pengguna; hasil masih dapat beririsan karena berasal dari YouTube. Trending, rilisan, dan riwayat tetap mengikuti data sumber.
 - **Antrean pemutaran** — lihat, tambah, hapus, dan atur urutan lagu; antrean disimpan secara lokal.
 - **Kontrol audio** — putar/jeda, sebelumnya/berikutnya (termasuk rekomendasi saat antrean habis), seek, volume responsif, repeat sekali/lagu/antrean, dan autoplay native yang tetap berjalan saat jendela diminimalkan. Kegagalan sementara dicoba ulang secara terbatas; pause manual tetap dihormati.
 - **Radio autoplay Windows** — saat antrean habis, mengambil kandidat radio YouTube Music berdasarkan lagu, menghindari ID/versi lagu dalam antrean dan 50 riwayat terakhir, serta memprioritaskan artis di luar tiga pemutaran terakhir. Urutan antrean manual tetap didahulukan; ini bukan salinan personalisasi akun YouTube Music.
 - **Riwayat mendengarkan** — tersimpan lintas sesi, dikelompokkan berdasarkan tanggal lokal.
-- **Lirik** — mengambil lirik dari LRCLIB, menyorot baris aktif pada lirik tersinkron, dan mendukung klik baris untuk seek jika timing tersedia.
-- **Now Playing** — artwork dan lirik dengan latar blur serta panel kaca. Windows mendukung pilihan Audio/Video dalam halaman yang sama melalui libmpv; pergantian mempertahankan posisi, volume, dan status jeda. Video disembunyikan saat halaman ditutup atau tertutup panel lain. Android tetap audio.
+- **Lirik multi-penyedia** — LRCLIB, KuGou, dan LyricsPlus dicari bersamaan. Pilih sumber per lagu atau Otomatis yang mengutamakan lirik bertimestamp; baris aktif mengikuti playback dan bisa diklik untuk seek. Tersedia penyesuaian timing ±30 detik, pencarian judul/artis manual, status setiap penyedia, serta coba ulang. Lirik tanpa timestamp tetap ditandai tidak sinkron; timing tidak dibuat-buat.
+- **Now Playing** — klik lagu aktif untuk membuka artwork besar, latar artwork blur, dan tab antrean/lirik dengan transisi lembut. Escape kembali dan memulihkan fokus; navigasi di belakang player tidak menerima fokus. Windows mendukung pilihan Audio/Video melalui libmpv; pergantian mempertahankan posisi, volume, dan status jeda. Video disembunyikan saat halaman ditutup atau tertutup panel lain. Android tetap audio.
+  Kembali, Escape, dan toggle player menutup panel dengan animasi turun 320 ms; panel tetap terpasang hingga transisi selesai sebelum fokus dikembalikan. Reduced motion atau animasi nonaktif melewati transisi. Video native disembunyikan selama gerakan panel.
 - **Discord Rich Presence** — tampilkan aktivitas mendengarkan; dapat dinyalakan/dimatikan melalui tombol Discord. Memerlukan Discord desktop berjalan.
-- **Antarmuka responsif** — sidebar ringkas, drawer antrean, dan navigasi untuk lebar layar kecil. `Ctrl+K` membuka pencarian.
+- **Antarmuka dark premium** — palet charcoal/biru, tipografi tegas, kartu artwork, sidebar ringkas, dan drawer antrean. Pada layar ≤760 px, lima navigasi berada di bawah dengan player di atasnya; safe area perangkat diperhitungkan. Warna dan preferensi tampilan tersimpan tetap dihormati. `Ctrl+K` membuka pencarian; animasi menghormati reduced motion.
+- **Menu konteks WebView dinonaktifkan** — klik kanan dan pemicu menu konteks keyboard tidak membuka menu browser bawaan dalam aplikasi.
 - **Pengaturan** — bahasa Indonesia/English, riwayat, tray, startup dan notifikasi opt-in, tampilan glass/glow, mode/volume awal, pintasan global, Discord, Last.fm, cache, dan impor/ekspor playlist. Preferensi disimpan lokal; konflik pintasan dilaporkan.
 - **Last.fm** — memerlukan kunci/rahasia aplikasi dan otorisasi akun melalui Settings. Kredensial Windows dilindungi DPAPI; pengiriman scrobble menggunakan waktu dengar aktual dan antrean retry lokal.
 
@@ -33,6 +38,8 @@ Streaming, discovery, artwork, dan lirik memerlukan internet serta ketersediaan 
 
 Track antrean berikutnya disiapkan lebih awal bila tersedia; klik lagu langsung menampilkan status penyiapan. Lirik mulai disiapkan bersamaan dengan ekstraksi audio/video, tanpa menunggu panel lirik atau durasi media; hasil di-cache dan disesuaikan saat durasi tersedia. Respons penyedia tetap dapat terlambat atau terkena rate-limit. Animasi menghormati pengaturan reduced motion.
 
+Smoke check UI: jalankan Vite, pilih lagu, tutup panel lirik, lalu jalankan `await (await import('/tests/ui-smoke.js')).checkLyricsExit()` di console browser. Check memeriksa exit, pemulihan fokus, background inert, dan overflow horizontal.
+
 ## Teknologi
 
 | Bagian | Teknologi |
@@ -42,7 +49,7 @@ Track antrean berikutnya disiapkan lebih awal bila tersedia; klik lagu langsung 
 | Penyimpanan lokal | SQLite melalui rusqlite |
 | Audio Windows | libmpv |
 | Pencarian dan ekstraksi audio | yt-dlp, runtime Node.js |
-| Lirik | LRCLIB |
+| Lirik | LRCLIB, KuGou, LyricsPlus |
 | Aktivitas Discord | Discord Rich Presence |
 
 ## Menjalankan di Windows
@@ -114,10 +121,10 @@ node --experimental-strip-types tests/genres.test.ts
 cargo test --manifest-path src-tauri/Cargo.toml
 
 # Build aplikasi dan installer Windows NSIS
-npm run tauri -- build
+npm run tauri -- build --bundles nsis
 ```
 
-Installer Windows dihasilkan di `src-tauri/target/release/bundle/nsis/`. Jangan commit installer ke repository; gunakan GitHub Releases jika ingin membagikannya setelah verifikasi dan pemenuhan lisensi dependency.
+Installer Windows versi 0.1.2 dihasilkan di `src-tauri/target/release/bundle/nsis/Sela_0.1.2_x64-setup.exe` pada build Windows x64 tanpa `--target` khusus. Konfigurasi Windows otomatis menyertakan yt-dlp, libmpv, dan Node.js; pengguna installer tidak perlu menyalin ketiga runtime tersebut secara manual. Mesin build memerlukan akses jaringan untuk dependency dan komponen bundler yang belum di-cache. Jangan commit installer ke repository; gunakan GitHub Releases jika ingin membagikannya setelah verifikasi dan pemenuhan lisensi dependency.
 
 ## Struktur proyek
 
@@ -136,7 +143,7 @@ docs/superpowers/       Spesifikasi dan rencana pengembangan
 - Database `sela.sqlite` dibuat di direktori data aplikasi melalui API `app_data_dir` Tauri, bukan di folder source.
 - Beberapa preferensi antarmuka/pemutaran tersimpan di localStorage WebView.
 - Tidak ada akun Sela atau sinkronisasi playlist cloud. Last.fm opsional membutuhkan otorisasi akun terpisah.
-- Permintaan musik dan metadata menghubungi YouTube/YouTube Music; lirik menghubungi LRCLIB. Aktivitas lagu dikirim ke Discord ketika Rich Presence aktif dan Last.fm setelah akun dihubungkan.
+- Permintaan musik dan metadata menghubungi YouTube/YouTube Music; judul/artis untuk lirik dikirim ke LRCLIB, KuGou, dan LyricsPlus. Aktivitas lagu dikirim ke Discord ketika Rich Presence aktif dan Last.fm setelah akun dihubungkan.
 
 ## Batasan saat ini
 
@@ -154,8 +161,4 @@ Detail target: [spesifikasi aplikasi](docs/superpowers/specs/2026-10-14-music-de
 
 ## Lisensi
 
-<<<<<<< HEAD
 Repository menyertakan GNU General Public License v3 pada `LICENSE`. Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.
-=======
-Dependency dan runtime pihak ketiga tetap mengikuti lisensinya masing-masing; periksa ketentuan yt-dlp, mpv/libmpv, Node.js, dan dependency Android sebelum redistribusi.
->>>>>>> f6bf7343fc3b0539619337f9a82238d16aae6d99

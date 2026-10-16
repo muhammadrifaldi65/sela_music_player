@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "app.sela.playback"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 31
         consumerProguardFiles("consumer-rules.pro")

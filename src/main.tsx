@@ -10,6 +10,7 @@ import { RenamePlaylist } from "./RenamePlaylist";
 import { Queue } from "./Queue";
 import { Home, History } from "./Discovery";
 import { NowPlaying } from "./NowPlaying";
+import { CommunityPlaylists } from "./CommunityPlaylists";
 import { Discord } from "./Discord";
 import { PreferenceGate } from "./Genres";
 import { Settings } from "./SettingsDialog";
@@ -21,6 +22,11 @@ function App() {
   const { t: tr, locale } = useTranslation();
   useSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => {
+    const preventContextMenu = (event: MouseEvent) => event.preventDefault();
+    document.addEventListener("contextmenu", preventContextMenu);
+    return () => document.removeEventListener("contextmenu", preventContextMenu);
+  }, []);
   const [compact, setCompact] = useState(
     () => localStorage.getItem("sidebar-compact") === "true",
   );
@@ -123,6 +129,7 @@ function App() {
               home: "Home",
               search: "Cari musik",
               history: "Riwayat",
+              community: "Komunitas",
               library: "Playlist saya",
             }).map(([id, label]) => (
               <button
@@ -148,6 +155,7 @@ function App() {
                           search:
                             "M21 21l-6-6M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0",
                           history: "M3 4v6h6M3 10a9 9 0 1 1 1 8M12 7v5l3 2",
+                          community: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
                           library: "M4 4v16M9 4v16M14 5l4-1 4 15-4 1Z",
                         } as Record<string, string>
                       )[id]
@@ -192,7 +200,7 @@ function App() {
             </div>
           </header>
           <div hidden={page !== "home"}>
-            <Home />
+            {page === "home" && <Home />}
           </div>
           <div hidden={page !== "search"}>
             <Search />
@@ -200,6 +208,7 @@ function App() {
           <div hidden={page !== "history"}>
             <History />
           </div>
+          {page === "community" && <CommunityPlaylists />}
           <div hidden={page !== "library"}>
             {error && <p role="alert">{error}</p>}
             {list ? (
@@ -255,11 +264,12 @@ function App() {
                         })}
                       >
                         <span className="cover" aria-hidden="true">
-                          {p.name.slice(0, 1)}
+                          <svg viewBox="0 0 80 80"><path d="M32 54V24l28-6v30M32 30l28-6" /><ellipse cx="24" cy="55" rx="8" ry="6" /><ellipse cx="52" cy="49" rx="8" ry="6" /></svg>
                         </span>
                         <h3>{p.name}</h3>
                         <span>{tr("Buka playlist")}</span>
                       </button>
+                      <div className="playlist-card-actions">
                       <RenamePlaylist
                         key={`${p.id}:${p.name}`}
                         id={p.id}
@@ -269,6 +279,7 @@ function App() {
                       <button onClick={() => void remove(p)}>
                         {tr("Hapus playlist")}
                       </button>
+                      </div>
                     </article>
                   ))}
                 </section>
