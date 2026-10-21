@@ -135,7 +135,6 @@ src-tauri/android/      Plugin native Android
 src-tauri/gen/android/  Proyek Android dan Gradle wrapper
 src-tauri/icons/        Ikon aplikasi
 tests/                  Pengujian frontend
-docs/superpowers/       Spesifikasi dan rencana pengembangan
 ```
 
 ## Data dan privasi
@@ -144,20 +143,6 @@ docs/superpowers/       Spesifikasi dan rencana pengembangan
 - Beberapa preferensi antarmuka/pemutaran tersimpan di localStorage WebView.
 - Tidak ada akun Sela atau sinkronisasi playlist cloud. Last.fm opsional membutuhkan otorisasi akun terpisah.
 - Permintaan musik dan metadata menghubungi YouTube/YouTube Music; judul/artis untuk lirik dikirim ke LRCLIB, KuGou, dan LyricsPlus. Aktivitas lagu dikirim ke Discord ketika Rich Presence aktif dan Last.fm setelah akun dihubungkan.
-
-## Batasan saat ini
-
-- Android belum selesai. Catatan pengembangan terakhir menyebut packaging APK terhambat izin symbolic link Windows; belum ada verifikasi playback Android.
-- Pemutaran file lokal memiliki implementasi native, tetapi alur dialog file belum terverifikasi end-to-end.
-- Auto-next native telah diuji melalui EOF dan jendela diminimalkan; pengujian berjam-jam dan semua kondisi jaringan belum dilakukan.
-- Lirik per kata dan terjemahan isi lirik belum tersedia. UI Indonesia/English, video Windows, Settings, dan integrasi Last.fm sudah diimplementasikan; otorisasi Last.fm nyata memerlukan kredensial dan persetujuan pengguna.
-- Artwork playlist, lifecycle antrean lengkap, gapless playback, integrasi Windows, installer pada mesin bersih, dan update aplikasi masih memerlukan pengerjaan atau verifikasi.
-- Tampilan status ringkas Discord di member list belum terverifikasi secara langsung.
-- Packaging redistribusi beserta pemberitahuan lisensi runtime native belum selesai. Jangan menganggap build lokal sudah siap sebagai rilis publik.
-
-Detail target: [spesifikasi aplikasi](docs/superpowers/specs/2026-10-14-music-desktop-design.md) dan [rencana implementasi](docs/superpowers/plans/2026-10-14-music-desktop.md).
-
-
 
 ## Lisensi
 
